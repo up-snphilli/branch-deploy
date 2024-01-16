@@ -37,13 +37,13 @@ jobs:
       # Do some fake "noop" deployment logic here
       # conditionally run a noop deployment
       - name: fake noop deploy
-        if: ${{ fromJSON(steps.branch-deploy.outputs.continue) && fromJSON(steps.branch-deploy.outputs.noop) }}
+        if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.noop == 'true' }}
         run: echo "I am doing a fake noop deploy"
 
       # Do some fake "regular" deployment logic here
       # conditionally run a regular deployment
       - name: fake regular deploy
-        if: ${{ fromJSON(steps.branch-deploy.outputs.continue) && !fromJSON(steps.branch-deploy.outputs.noop) }}
+        if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.noop != 'true' }}
         run: echo "I am doing a fake regular deploy"
 
   unlock-on-merge:
