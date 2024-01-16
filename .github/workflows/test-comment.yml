@@ -1,0 +1,29 @@
+name: "Test Comment"
+
+# The workflow to execute on is comments that are newly created
+on:
+  issue_comment:
+    types: [created]
+
+# Permissions needed for reacting and adding comments for IssueOps commands
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  new-pr:
+    if: ${{ github.event.issue.pull_request }} # only run on pull request comments
+    runs-on: ubuntu-latest
+
+    steps:
+      # Comment on new PR requests with deployment instructions
+      - name: comment
+        uses: GrantBirki/comment@v2.0.8
+        continue-on-error: true
+        with:
+          body: |
+            This is a multi-line test comment
+  
+            - With GitHub **Markdown** ✨
+            - Cool!
+          reactions: '+1'
