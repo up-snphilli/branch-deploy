@@ -21,6 +21,7 @@ jobs:
         uses: GrantBirki/comment@v2.0.8
         continue-on-error: true
         with:
+          comment-id: ${{ github.event.comment.id }}
           body: |
             This is a multi-line test comment
   
