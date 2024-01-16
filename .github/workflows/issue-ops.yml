@@ -15,18 +15,6 @@ permissions:
   checks: read
 
 jobs:
-  unlock-on-merge:
-    runs-on: ubuntu-latest
-    # Gate this job to only run when the pull request is merged (not closed)
-    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#running-your-pull_request-workflow-when-a-pull-request-merges
-    if: ${{ fromJSON(github.event.pull_request.merged) }}
-
-    steps:
-      - name: unlock on merge
-        uses: github/branch-deploy@v8.2.1
-        id: unlock-on-merge
-        with:
-          unlock_on_merge_mode: true # <-- indicates that this is the "Unlock on Merge Mode" workflow
   demo:
     if: ${{ github.event.issue.pull_request }} # only run on pull request comments
     runs-on: ubuntu-latest
@@ -57,3 +45,16 @@ jobs:
       - name: fake regular deploy
         if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.noop != 'true' }}
         run: echo "I am doing a fake regular deploy"
+
+  unlock-on-merge:
+    runs-on: ubuntu-latest
+    # Gate this job to only run when the pull request is merged (not closed)
+    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#running-your-pull_request-workflow-when-a-pull-request-merges
+    if: ${{ github.event.pull_request.merged == true }}
+
+    steps:
+      - name: unlock on merge
+        uses: github/branch-deploy@v8.2.1
+        id: unlock-on-merge
+        with:
+          unlock_on_merge_mode: true # <-- indicates that this is the "Unlock on Merge Mode" workflow
