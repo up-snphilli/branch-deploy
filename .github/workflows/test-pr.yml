@@ -1,0 +1,22 @@
+name: Test PR
+
+on: pull_request
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  new-pr:
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: comment
+        uses: GrantBirki/comment@v2.0.8
+        continue-on-error: true
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          body: |
+            .trigger cd
+          reactions: '+1'
