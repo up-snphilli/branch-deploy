@@ -1,0 +1,60 @@
+name: "IssueOps"
+
+# The workflow to execute on is comments that are newly created
+on:
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [closed]
+
+# Permissions needed for reacting and adding comments for IssueOps commands
+permissions:
+  pull-requests: write
+  deployments: write
+  contents: write
+  checks: read
+
+jobs:
+  demo:
+    if: ${{ github.event.issue.pull_request }} # only run on pull request comments
+    runs-on: ubuntu-latest
+    steps:
+      # Execute IssueOps branch deployment logic, hooray!
+      # This will be used to "gate" all future steps below and conditionally trigger steps/deployments
+      - uses: github/branch-deploy@v8.2.1
+        id: branch-deploy
+        with:
+          trigger: .deploy
+          sticky_locks: true
+
+      # Run your deployment logic for your project here - examples seen below
+
+      # Checkout your projects repository based on the ref provided by the branch-deploy step
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.branch-deploy.outputs.ref }}
+
+      # Do some fake "noop" deployment logic here
+      # conditionally run a noop deployment
+      - name: fake noop deploy
+        if: ${{ fromJSON(steps.branch-deploy.outputs.continue) && fromJSON(steps.branch-deploy.outputs.noop) }}
+        run: echo "I am doing a fake noop deploy"
+
+      # Do some fake "regular" deployment logic here
+      # conditionally run a regular deployment
+      - name: fake regular deploy
+        if: ${{ fromJSON(steps.branch-deploy.outputs.continue) && !fromJSON(steps.branch-deploy.outputs.noop) }}
+        run: echo "I am doing a fake regular deploy"
+
+  unlock-on-merge:
+    runs-on: ubuntu-latest
+    # Gate this job to only run when the pull request is merged (not closed)
+    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#running-your-pull_request-workflow-when-a-pull-request-merges
+    if: ${{ fromJSON(github.event.pull_request.merged) }}
+
+    steps:
+      - name: unlock on merge
+        uses: github/branch-deploy@v8.2.1
+        id: unlock-on-merge
+        with:
+          unlock_on_merge_mode: true # <-- indicates that this is the "Unlock on Merge Mode" workflow
